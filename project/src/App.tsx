@@ -278,7 +278,6 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [selectedJourney, setSelectedJourney] = useState<JourneyOption | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [debugLogs, setDebugLogs] = useState<string[]>([]);
   const [searchParams, setSearchParams] = useState({
     from: '',
     to: '',
@@ -291,28 +290,16 @@ function App() {
     searchJourneys: '/api/routes'
   };
 
-  // Debug logging function
-  const addDebugLog = (message: string) => {
-    const timestamp = new Date().toLocaleTimeString();
-    setDebugLogs(prev => [...prev, `[${timestamp}] ${message}`]);
-    console.log(`[DEBUG ${timestamp}] ${message}`);
-  };
-
   // Function to fetch journeys from backend
   const fetchJourneys = async (from: string, to: string, date: string) => {
     try {
       setLoading(true);
       setError(null);
-      setDebugLogs([]); // Clear previous logs
-      
-      addDebugLog(`Starting search: ${from} → ${to} on ${date}`);
       
       // Construct API URL with query parameters
       const url = new URL(`${API_BASE_URL}${API_ENDPOINTS.searchJourneys}`);
       url.searchParams.append('from', from);
       url.searchParams.append('to', to);
-      
-      addDebugLog(`Making request to: ${url.toString()}`);
       
       const response = await fetch(url.toString(), {
         method: 'GET',
@@ -322,14 +309,11 @@ function App() {
         mode: 'cors',
       });
       
-      addDebugLog(`Response status: ${response.status} ${response.statusText}`);
-      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
       }
       
       const data: APIJourneyResponse[] = await response.json();
-      addDebugLog(`Received ${data.length} journey options from API`);
       
       // Validate response format
       if (!Array.isArray(data)) {
@@ -338,112 +322,35 @@ function App() {
       
       // Check if no journeys are available
       if (data.length === 0) {
-        addDebugLog('No journeys found in response');
         setJourneys([]);
         return;
       }
       
       const parsedJourneys = parseJourneyData(data);
-      addDebugLog(`Parsed ${parsedJourneys.length} journeys successfully`);
       setJourneys(parsedJourneys);
       
     } catch (error) {
-      addDebugLog(`Error occurred: ${error}`);
       console.error('Error fetching journeys:', error);
       
       // Provide more specific error messages
       let errorMessage = 'Failed to fetch journeys';
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
         errorMessage = `Cannot connect to backend server at ${API_BASE_URL}. Please ensure the backend is running.`;
-        addDebugLog('Network error detected - likely CORS or connection issue');
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
       
       setError(errorMessage);
+      setJourneys([]); // Clear journeys on error
       
-      // Fallback to example data for development/testing
-      addDebugLog('Using fallback example data...');
-      const fallbackData: APIJourneyResponse[] = [
-        {
-          type: "direct",
-          totalPrice: 625.0,
-          finalArrivalTime: "13:00",
-          legs: [
-            {
-              trainName: "Chennai Express",
-              fromStation: "Chennai",
-              departureTime: "06:00",
-              toStation: "Mysore",
-              arrivalTime: "13:00",
-              distanceKm: 500,
-              price: 625.0
-            }
-          ]
-        },
-        {
-          type: "connecting",
-          totalPrice: 625.0,
-          finalArrivalTime: "13:00",
-          legs: [
-            {
-              trainName: "Chennai Express",
-              fromStation: "Chennai",
-              departureTime: "06:00",
-              toStation: "Vellore",
-              arrivalTime: "08:00",
-              distanceKm: 150,
-              price: 187.5
-            },
-            {
-              trainName: "Chennai Express",
-              fromStation: "Vellore",
-              departureTime: "08:00",
-              toStation: "Mysore",
-              arrivalTime: "13:00",
-              distanceKm: 350,
-              price: 437.5
-            }
-          ]
-        },
-        {
-          type: "connecting",
-          totalPrice: 625.0,
-          finalArrivalTime: "13:00",
-          legs: [
-            {
-              trainName: "Kaveri Express",
-              fromStation: "Chennai",
-              departureTime: "05:30",
-              toStation: "Bangalore",
-              arrivalTime: "10:30",
-              distanceKm: 350,
-              price: 437.5
-            },
-            {
-              trainName: "Chennai Express",
-              fromStation: "Bangalore",
-              departureTime: "11:00",
-              toStation: "Mysore",
-              arrivalTime: "13:00",
-              distanceKm: 150,
-              price: 187.5
-            }
-          ]
-        }
-      ];
-      const parsedJourneys = parseJourneyData(fallbackData);
-      setJourneys(parsedJourneys);
     } finally {
       setLoading(false);
-      addDebugLog('Search completed');
     }
   };
 
   // Handle search button click
   const handleSearch = () => {
     if (!searchParams.from || !searchParams.to) {
-      addDebugLog('Search attempted with empty from/to fields');
       return;
     }
     fetchJourneys(searchParams.from, searchParams.to, searchParams.date);
@@ -552,25 +459,8 @@ function App() {
           </div>
         </div>
 
-        {/* Debug Panel */}
-        {debugLogs.length > 0 && (
-          <div className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-2xl p-4 mb-6">
-            <h3 className="text-white font-medium mb-2">Debug Logs:</h3>
-            <div className="bg-black/50 rounded-lg p-3 max-h-40 overflow-y-auto">
-              {debugLogs.map((log, index) => (
-                <div key={index} className="text-green-300 text-xs font-mono mb-1">
-                  {log}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Sort Controls */}
-        {journeys.length > 0 && <SortControls currentSort={sortBy} onSortChange={setSortBy} />}
-
-        {/* Journey Results */}
-        {error && journeys.length > 0 && (
+        {/* Error Display */}
+        {error && (
           <div className="bg-red-500/20 backdrop-blur-lg border border-red-500/30 rounded-2xl p-6 mb-8">
             <div className="flex items-center gap-3 text-red-200">
               <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
@@ -579,12 +469,15 @@ function App() {
               <div>
                 <h3 className="font-semibold">Connection Error</h3>
                 <p className="text-sm text-red-200/80">{error}</p>
-                <p className="text-xs text-red-200/60 mt-1">Using sample data for demonstration</p>
               </div>
             </div>
           </div>
         )}
-        
+
+        {/* Sort Controls */}
+        {journeys.length > 0 && <SortControls currentSort={sortBy} onSortChange={setSortBy} />}
+
+        {/* Journey Results */}
         {loading && searchParams.from && searchParams.to ? (
           <div className="text-center py-16">
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 inline-block">
