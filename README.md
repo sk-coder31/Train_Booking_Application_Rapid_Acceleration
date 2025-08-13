@@ -1,4 +1,3 @@
-
 # 🚆 Train Search Web Application
 
 <div align="center">
@@ -7,8 +6,8 @@
 
 **A comprehensive train search platform for finding optimal routes between stations**
 
-[![Demo Video](https://img.shields.io/badge/📹_Demo-Watch_Video-red?style=for-the-badge&logo=youtube)](YOUR_YOUTUBE_VIDEO_LINK_HERE)
-[![Live Demo](https://img.shields.io/badge/🚀_Live-Demo-blue?style=for-the-badge)](YOUR_LIVE_DEMO_LINK_HERE)
+[![Demo Video](https://img.shields.io/badge/📹_Demo-Watch_Video-red?style=for-the-badge&logo=youtube)](https://youtu.be/24d3XOIv0oY)
+[![Docker Hub](https://img.shields.io/badge/🐳_Docker-sk31082004/my--springboot--app-blue?style=for-the-badge&logo=docker)](https://hub.docker.com/r/sk31082004/my-springboot-app)
 [![GitHub](https://img.shields.io/badge/⭐_Star-Repository-yellow?style=for-the-badge&logo=github)](https://github.com/YOUR_USERNAME/YOUR_REPO)
 
 </div>
@@ -45,9 +44,9 @@ The Train Search Web Application is a full-stack solution that enables users to 
 
 <div align="center">
 
-[![Train Search Demo](https://img.youtube.com/vi/YOUR_YOUTUBE_VIDEO_ID/maxresdefault.jpg)](YOUR_YOUTUBE_VIDEO_LINK_HERE)
+[![Train Search Demo](https://img.youtube.com/vi/24d3XOIv0oY/maxresdefault.jpg)](https://youtu.be/24d3XOIv0oY)
 
-**[🎥 Watch Full Demo on YouTube](YOUR_YOUTUBE_VIDEO_LINK_HERE)**
+**[🎥 Watch Full Demo on YouTube](https://youtu.be/24d3XOIv0oY)**
 
 *Duration: X minutes | Live demonstration of all features*
 
@@ -85,13 +84,13 @@ The Train Search Web Application is a full-stack solution that enables users to 
 
 ```mermaid
 graph TB
-    A[Frontend - React] --> B[Backend API - Node.js]
+    A[Frontend - React] --> B[Backend API - Spring Boot]
     B --> C[Database - MongoDB]
     B --> D[Route Algorithm]
     D --> E[Price Calculator]
-    F[Docker Container] --> A
-    F --> B
-    F --> C
+    F[Docker Container<br/>sk31082004/my-springboot-app] --> B
+    G[Docker Container] --> A
+    G --> C
 ```
 
 ## 🛠️ Tech Stack
@@ -101,7 +100,7 @@ graph TB
 | Category | Technology | Purpose |
 |----------|------------|---------|
 | **Frontend** | ![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black) | User Interface |
-| **Backend** | ![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white) | Server & APIs |
+| **Backend** | ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?logo=spring&logoColor=white) | Server & APIs |
 | **Database** | ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white) | Data Storage |
 | **Styling** | ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white) | Responsive Design |
 | **Container** | ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white) | Deployment |
@@ -111,8 +110,9 @@ graph TB
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 16+ and npm
+- Java 17+ and Maven
 - MongoDB 4.4+
+- Node.js 16+ (for frontend)
 - Git
 
 ### Installation
@@ -123,46 +123,48 @@ graph TB
    cd train-search-app
    ```
 
-2. **Install dependencies**
+2. **Backend Setup (Spring Boot)**
    ```bash
-   # Install backend dependencies
+   # Navigate to backend directory
    cd backend
-   npm install
    
-   # Install frontend dependencies
-   cd ../frontend
-   npm install
-   ```
-
-3. **Environment Setup**
-   ```bash
-   # Backend environment
-   cd backend
-   cp .env.example .env
-   # Edit .env with your MongoDB connection string
-   ```
-
-4. **Generate Test Data**
-   ```bash
-   # Generate 1000 trains and routes
-   cd backend
-   npm run generate-data
-   ```
-
-5. **Start the Application**
-   ```bash
-   # Start backend (Terminal 1)
-   cd backend
-   npm start
+   # Build the application
+   mvn clean install
    
-   # Start frontend (Terminal 2)
+   # Run the Spring Boot application
+   mvn spring-boot:run
+   ```
+
+3. **Frontend Setup (React)**
+   ```bash
+   # Navigate to frontend directory
    cd frontend
+   
+   # Install dependencies
+   npm install
+   
+   # Start the development server
    npm start
+   ```
+
+4. **Environment Configuration**
+   ```bash
+   # Backend configuration (application.properties)
+   cd backend/src/main/resources
+   # Edit application.properties with your MongoDB connection string
+   spring.data.mongodb.uri=mongodb://localhost:27017/traindb
+   ```
+
+5. **Generate Test Data**
+   ```bash
+   # Use the data generation endpoint or script
+   curl -X POST http://localhost:8080/api/generate-data
    ```
 
 6. **Access the Application**
    - Frontend: http://localhost:3000
-   - Backend API: http://localhost:5000
+   - Backend API: http://localhost:8080
+   - API Documentation: http://localhost:8080/swagger-ui.html
 
 ## 📊 Database Schema
 
@@ -267,42 +269,69 @@ graph TB
 
 ### Run Tests
 ```bash
-# Backend tests
+# Backend tests (Spring Boot)
 cd backend
-npm test
+mvn test
 
-# Frontend tests
+# Frontend tests (React)
 cd frontend
 npm test
 ```
 
 ### Test Data Generation
-The application includes a script to generate 1000 trains with realistic routes:
+The application includes an endpoint to generate 1000 trains with realistic routes:
 ```bash
-npm run generate-data
+curl -X POST http://localhost:8080/api/generate-data
 ```
 
 ## 🐳 Docker Deployment
 
-### Using Docker Compose
+### Quick Docker Run
 ```bash
-# Build and start all services
-docker-compose up --build
+# Pull and run the Spring Boot backend
+docker pull sk31082004/my-springboot-app
+docker run -p 8080:8080 sk31082004/my-springboot-app
 
-# Run in background
-docker-compose up -d
-```
-
-### Manual Docker Build
-```bash
-# Build images
+# Build and run frontend
 docker build -t train-search-frontend ./frontend
-docker build -t train-search-backend ./backend
-
-# Run containers
 docker run -p 3000:3000 train-search-frontend
-docker run -p 5000:5000 train-search-backend
 ```
+
+### Using Docker Compose
+```yaml
+version: '3.8'
+services:
+  backend:
+    image: sk31082004/my-springboot-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/traindb
+    depends_on:
+      - mongo
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
+```
+
+### Docker Hub
+The backend application is available on Docker Hub:
+- **Image**: `sk31082004/my-springboot-app`
+- **Pull Command**: `docker pull sk31082004/my-springboot-app`
 
 ## 🤝 Contributing
 
