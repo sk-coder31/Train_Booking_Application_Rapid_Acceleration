@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Train Search Banner](https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&h=300&fit=crop&crop=center)
+![Train Search Banner](https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800&h=300&fit=crop&crop=center)
 
 **A comprehensive train search platform for finding optimal routes between stations**
 
