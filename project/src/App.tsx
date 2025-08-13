@@ -285,7 +285,7 @@ function App() {
   });
 
   // Backend API configuration
-  const API_BASE_URL = 'http://localhost:8080';
+  const API_BASE_URL = 'https://train-application.onrender.com';
   const API_ENDPOINTS = {
     searchJourneys: '/api/routes'
   };
